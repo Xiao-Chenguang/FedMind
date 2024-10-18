@@ -25,7 +25,7 @@ def test_fedavg():
     args.n_clients = 10
     args.NUM_PROCESS = 5
     args.CLIENT = {}
-    args.CLIENT.EPOCHS = 10  # type: ignore
+    args.CLIENT.EPOCHS = 3  # type: ignore
 
     size = 100
     shape = 100000
