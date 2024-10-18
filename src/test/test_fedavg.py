@@ -1,7 +1,7 @@
 from flair.algs.fedavg import FedAvg
 from flair.utils import EasyDict
 
-from torch import nn, optim
+from torch import nn
 import torch
 from torch.utils.data import DataLoader, Dataset
 
@@ -26,6 +26,9 @@ def test_fedavg():
     args.NUM_PROCESS = 5
     args.CLIENT = {}
     args.CLIENT.EPOCHS = 3  # type: ignore
+    args.optim = {}
+    args.optim.name = "SGD"  # type: ignore
+    args.optim.lr = 0.01  # type: ignore
 
     size = 100
     shape = 100000
@@ -36,14 +39,12 @@ def test_fedavg():
 
     model = nn.Sequential(nn.Linear(shape, 32), nn.ReLU(), nn.Linear(32, classes))
 
-    optimizer = optim.SGD(model.parameters(), lr=args.lr)  # type: ignore
     criterion = nn.CrossEntropyLoss()
 
     FedAvg(
         model=model,
         fed_loader=fed_loader,
         test_loader=test_loader,
-        optimizer=optimizer,
         criterion=criterion,
         args=args,
     ).fit(args.n_clients, 5, 2)  # type: ignore
