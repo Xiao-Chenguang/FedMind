@@ -39,6 +39,7 @@ def train(
     """
     # Train the model
     model.load_state_dict(gm_params)
+    cost = 0.0
     model.train()
     for epoch in range(epochs):
         logger.info(f"Epoch {epoch + 1}/{epochs}")
@@ -50,8 +51,12 @@ def train(
             optimizer.step()
             if loss.isnan():
                 logger.warning("Loss is NaN.")
+            cost += loss.item()
 
-    return {"model_parameters": model.state_dict(destination=StateDict())}
+    return {
+        "model_update": model.state_dict(destination=StateDict()) - gm_params,
+        "train_loss": cost / len(train_loader) / epochs,
+    }
 
 
 def test(

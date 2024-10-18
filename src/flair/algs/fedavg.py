@@ -3,7 +3,7 @@ from torch.nn.modules.loss import _Loss
 from torch.utils.data import DataLoader
 
 from flair.server import FedAlg
-from flair.utils import EasyDict, StateDict
+from flair.utils import EasyDict
 
 
 class FedAvg(FedAlg):
@@ -26,7 +26,7 @@ class FedAvg(FedAlg):
         Args:
             updates: The list of updates to aggregate.
         """
-        state_dict = self.model.state_dict(destination=StateDict())
-        for update in updates:
-            state_dict += update["model_parameters"]
-        self.model.load_state_dict(state_dict)
+        agg_update = sum([update["model_update"] for update in updates]) / len(updates)
+        agg_loss = sum([update["train_loss"] for update in updates]) / len(updates)
+        self.gm_params += agg_update
+        self.logger.info(f"Train loss: {agg_loss:.4f}")
