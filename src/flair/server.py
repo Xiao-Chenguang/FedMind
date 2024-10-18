@@ -4,11 +4,11 @@ import torch.multiprocessing as mp
 from torch import randperm
 from torch.nn import Module
 from torch.nn.modules.loss import _Loss
-from torch.optim.optimizer import Optimizer
+from torch.optim import SGD
 from torch.utils.data import DataLoader
 
 from flair.client import test, train, train_process
-from flair.utils import EasyDict
+from flair.utils import EasyDict, StateDict
 
 
 class FedAlg:
@@ -27,16 +27,21 @@ class FedAlg:
         model: Module,
         fed_loader: list[DataLoader],
         test_loader: DataLoader,
-        optimizer: Optimizer,
         criterion: _Loss,
         args: EasyDict,
     ):
         self.model = model
         self.fed_loader = fed_loader
         self.test_loader = test_loader
-        self.optimizer = optimizer
         self.criterion = criterion
         self.args = args
+
+        self.gm_params = self.model.state_dict(destination=StateDict())
+        optim: dict = self.args.optim  # type: ignore
+        if optim["name"] == "SGD":
+            self.optimizer = SGD(self.model.parameters(), lr=optim["lr"])
+        else:
+            raise NotImplementedError(f"Optimizer {optim['name']} not implemented.")
 
         logging.basicConfig(
             level=logging.INFO,
@@ -60,7 +65,15 @@ class FedAlg:
         # Start client processes
         self.processes = []
         for worker_id in range(self.args.NUM_PROCESS):  # type: ignore
-            args = (worker_id, self.task_queue, self.result_queue)
+            args = (
+                worker_id,
+                self.task_queue,
+                self.result_queue,
+                self.model,
+                self.args.optim,  # type: ignore
+                self.criterion,
+                self.args.CLIENT.EPOCHS,  # type: ignore
+            )
             p = mp.Process(target=train_process, args=args)
             p.start()
             self.processes.append(p)
@@ -100,6 +113,7 @@ class FedAlg:
         """Evaluate the model."""
         test(
             self.model,
+            self.gm_params,
             self.test_loader,
             self.criterion,
             self.logger,
@@ -127,6 +141,7 @@ class FedAlg:
                     updates.append(
                         train(
                             self.model,
+                            self.gm_params,
                             self.fed_loader[cid],
                             self.optimizer,
                             self.criterion,
@@ -137,16 +152,7 @@ class FedAlg:
             else:
                 # Parallel simulation with torch.multiprocessing
                 for cid in range(num_clients):
-                    self.task_queue.put(
-                        (
-                            self.model,
-                            self.fed_loader[cid],
-                            self.optimizer,
-                            self.criterion,
-                            self.args.CLIENT.EPOCHS,  # type: ignore
-                            self.logger,
-                        )
-                    )
+                    self.task_queue.put((self.gm_params, self.fed_loader[cid]))
                 for cid in range(num_clients):
                     updates.append(self.result_queue.get())
 

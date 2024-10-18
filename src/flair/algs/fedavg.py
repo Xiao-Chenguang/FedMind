@@ -1,6 +1,5 @@
 from torch.nn import Module
 from torch.nn.modules.loss import _Loss
-from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from flair.server import FedAlg
@@ -15,11 +14,10 @@ class FedAvg(FedAlg):
         model: Module,
         fed_loader: list[DataLoader],
         test_loader: DataLoader,
-        optimizer: Optimizer,
         criterion: _Loss,
         args: EasyDict,
     ):
-        super().__init__(model, fed_loader, test_loader, optimizer, criterion, args)
+        super().__init__(model, fed_loader, test_loader, criterion, args)
         self.logger.info("Start Federated Averaging.")
 
     def _aggregate_updates(self, updates: list[dict]):
