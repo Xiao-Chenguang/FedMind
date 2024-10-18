@@ -25,7 +25,7 @@ def test_fedavg():
     args.n_clients = 10
     args.NUM_PROCESS = 5
     args.CLIENT = {}
-    args.CLIENT.EPOCHS = 10
+    args.CLIENT.EPOCHS = 10  # type: ignore
 
     size = 100
     shape = 100000
@@ -36,7 +36,7 @@ def test_fedavg():
 
     model = nn.Sequential(nn.Linear(shape, 32), nn.ReLU(), nn.Linear(32, classes))
 
-    optimizer = optim.SGD(model.parameters(), lr=args.lr)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr)  # type: ignore
     criterion = nn.CrossEntropyLoss()
 
     FedAvg(
@@ -46,7 +46,7 @@ def test_fedavg():
         optimizer=optimizer,
         criterion=criterion,
         args=args,
-    ).fit(args.n_clients, 5, 2)
+    ).fit(args.n_clients, 5, 2)  # type: ignore
 
     assert True
 
