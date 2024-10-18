@@ -1,4 +1,4 @@
-from flair.fedavg import FedAvg
+from flair.algs.fedavg import FedAvg
 from flair.utils import EasyDict
 
 from torch import nn, optim
