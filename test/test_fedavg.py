@@ -24,6 +24,7 @@ def test_fedavg():
         "MOMENTUM": 0.9,
     }
 
+    # 1. Prepare Federated Learning DataSets
     org_ds = MNIST("dataset", train=True, download=True, transform=ToTensor())
     test_ds = MNIST("dataset", train=False, download=True, transform=ToTensor())
 
@@ -34,6 +35,7 @@ def test_fedavg():
     fed_loader = [DataLoader(ds, batch_size=32, shuffle=True) for ds in fed_dss]
     test_loader = DataLoader(test_ds, batch_size=32)
 
+    # 2. Prepare Model and Criterion
     classes = 10
     shape = org_ds[0][0].shape[0] * org_ds[0][0].shape[1] * org_ds[0][0].shape[2]
     model = nn.Sequential(
@@ -45,6 +47,7 @@ def test_fedavg():
 
     criterion = nn.CrossEntropyLoss()
 
+    # 3. Run Federated Learning Simulation
     FedAvg(
         model=model,
         fed_loader=fed_loader,
