@@ -10,6 +10,7 @@ from flair.utils import EasyDict
 
 
 def test_fedavg():
+    # 0. Prepare necessary arguments
     args = EasyDict()
     args.SERVER_EPOCHS = 3
     args.LR = 0.1
