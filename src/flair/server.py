@@ -37,11 +37,11 @@ class FedAlg:
         self.args = args
 
         self.gm_params = self.model.state_dict(destination=StateDict())
-        optim: dict = self.args.optim  # type: ignore
-        if optim["name"] == "SGD":
-            self.optimizer = SGD(self.model.parameters(), lr=optim["lr"])
+        optim: dict = self.args.OPTIM  # type: ignore
+        if optim["NAME"] == "SGD":
+            self.optimizer = SGD(self.model.parameters(), lr=optim["LR"])
         else:
-            raise NotImplementedError(f"Optimizer {optim['name']} not implemented.")
+            raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
 
         logging.basicConfig(
             level=logging.INFO,
@@ -70,9 +70,9 @@ class FedAlg:
                 self.task_queue,
                 self.result_queue,
                 self.model,
-                self.args.optim,  # type: ignore
+                self.args.OPTIM,  # type: ignore
                 self.criterion,
-                self.args.CLIENT.EPOCHS,  # type: ignore
+                self.args.CLIENT_EPOCHS,  # type: ignore
             )
             p = mp.Process(target=train_process, args=args)
             p.start()
@@ -145,7 +145,7 @@ class FedAlg:
                             self.fed_loader[cid],
                             self.optimizer,
                             self.criterion,
-                            self.args.CLIENT.EPOCHS,  # type: ignore
+                            self.args.CLIENT_EPOCHS,  # type: ignore
                             self.logger,
                         )
                     )

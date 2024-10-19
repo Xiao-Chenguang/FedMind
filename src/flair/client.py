@@ -124,10 +124,10 @@ def train_process(
     )
     logger = logging.getLogger(f"Worker-{worker_id}")
     logger.info(f"Worker-{worker_id} started.")
-    if optim["name"] == "SGD":
-        optimizer = SGD(model.parameters(), lr=optim["lr"])
+    if optim["NAME"] == "SGD":
+        optimizer = SGD(model.parameters(), lr=optim["LR"])
     else:
-        raise NotImplementedError(f"Optimizer {optim['name']} not implemented.")
+        raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
     while True:
         task = task_queue.get()
         if task == "STOP":
