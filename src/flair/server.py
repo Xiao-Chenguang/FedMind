@@ -53,8 +53,8 @@ class FedAlg:
 
         self.wb_run = wandb.init(
             mode="offline",
-            project=args.get("wb_project", "flair"),
-            entity=args.get("wb_entity", "wandb"),
+            project=args.get("WB_PROJECT", "flair"),
+            entity=args.get("WB_ENTITY", "wandb"),
             config=self.args.to_dict(),
             settings=wandb.Settings(_disable_stats=True, _disable_machine_info=True),
         )
