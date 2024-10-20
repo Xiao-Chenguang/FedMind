@@ -1,3 +1,5 @@
+from functools import reduce
+
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
@@ -38,10 +40,10 @@ def test_fedavg():
 
     # 2. Prepare Model and Criterion
     classes = 10
-    shape = org_ds[0][0].shape[0] * org_ds[0][0].shape[1] * org_ds[0][0].shape[2]
+    features = reduce(lambda x, y: x * y, org_ds[0][0].shape)
     model = nn.Sequential(
         nn.Flatten(),
-        nn.Linear(shape, 32),
+        nn.Linear(features, 32),
         nn.ReLU(),
         nn.Linear(32, classes),
     )
