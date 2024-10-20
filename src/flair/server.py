@@ -1,4 +1,6 @@
+import os
 import logging
+import wandb
 
 import torch.multiprocessing as mp
 from torch import randperm
@@ -48,6 +50,14 @@ class FedAlg:
             format="%(asctime)s [%(processName)s] %(message)s",
         )
         self.logger = logging.getLogger("Server")
+
+        self.wb_run = wandb.init(
+            mode="offline",
+            project=args.get("wb_project", "flair"),
+            entity=args.get("wb_entity", "wandb"),
+            config=self.args.to_dict(),
+            settings=wandb.Settings(_disable_stats=True, _disable_machine_info=True),
+        )
 
         if self.args.NUM_PROCESS > 0:  # type: ignore
             self.__init_mp__()
@@ -101,17 +111,24 @@ class FedAlg:
         """
         return randperm(pool)[:num_clients].tolist()
 
-    def _aggregate_updates(self, updates: list[dict]):
+    def _aggregate_updates(self, updates: list[dict]) -> dict:
         """Aggregate updates to new model.
 
         Args:
             updates: The list of updates to aggregate.
+
+        Returns:
+            The aggregated metrics.
         """
         raise NotImplementedError("Aggregate updates method must be implemented.")
 
-    def _evaluate(self):
-        """Evaluate the model."""
-        test(
+    def _evaluate(self) -> dict:
+        """Evaluate the model.
+
+        Returns:
+            The evaluation metrics.
+        """
+        return test(
             self.model,
             self.gm_params,
             self.test_loader,
@@ -157,11 +174,18 @@ class FedAlg:
                     updates.append(self.result_queue.get())
 
             # 3. Aggregate updates to new model
-            self._aggregate_updates(updates)
+            train_metrics = self._aggregate_updates(updates)
 
             # 4. Evaluate the new model
-            self._evaluate()
+            test_metrics = self._evaluate()
+
+            # 5. Log metrics
+            self.wb_run.log(train_metrics | test_metrics)
 
         # Terminate multi-process environment
         if self.args.NUM_PROCESS > 0:  # type: ignore
             self.__del_mp__()
+
+        # Finish wandb run and sync
+        self.wb_run.finish()
+        os.system(f"wandb sync {os.path.dirname(self.wb_run.dir)}")
