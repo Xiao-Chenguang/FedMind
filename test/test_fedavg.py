@@ -27,6 +27,9 @@ def test_fedavg():
         "MOMENTUM": 0.9,
     }
 
+    args.WB_PROJECT = "example_project"
+    args.WB_ENTITY = "example_entity"
+
     # 1. Prepare Federated Learning DataSets
     org_ds = MNIST("dataset", train=True, download=True, transform=ToTensor())
     test_ds = MNIST("dataset", train=False, download=True, transform=ToTensor())
