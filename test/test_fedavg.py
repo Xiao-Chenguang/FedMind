@@ -8,27 +8,12 @@ from torchvision.transforms import ToTensor
 
 from flair.algs.fedavg import FedAvg
 from flair.data import ClientDataset
-from flair.utils import EasyDict
+from flair.config import get_config
 
 
 def test_fedavg():
     # 0. Prepare necessary arguments
-    args = EasyDict()
-    args.SERVER_EPOCHS = 3
-    args.LR = 0.1
-    args.NUM_CLIENT = 100
-    args.ACTIVE_CLIENT = 10
-    args.NUM_PROCESS = 5
-    args.BATCH_SIZE = 32
-    args.CLIENT_EPOCHS = 3  # type: ignore
-    args.OPTIM = {
-        "NAME": "SGD",
-        "LR": 0.1,
-        "MOMENTUM": 0.9,
-    }
-
-    args.WB_PROJECT = "example_project"
-    args.WB_ENTITY = "example_entity"
+    args = get_config("config.yaml")
 
     # 1. Prepare Federated Learning DataSets
     org_ds = MNIST("dataset", train=True, download=True, transform=ToTensor())
