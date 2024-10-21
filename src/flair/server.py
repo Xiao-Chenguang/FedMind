@@ -1,6 +1,7 @@
 import os
 import logging
 import wandb
+import yaml
 
 import torch.multiprocessing as mp
 from torch import randperm
@@ -45,12 +46,6 @@ class FedAlg:
         else:
             raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
 
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s [%(processName)s] %(message)s",
-        )
-        self.logger = logging.getLogger("Server")
-
         self.wb_run = wandb.init(
             mode="offline",
             project=args.get("WB_PROJECT", "flair"),
@@ -58,6 +53,13 @@ class FedAlg:
             config=self.args.to_dict(),
             settings=wandb.Settings(_disable_stats=True, _disable_machine_info=True),
         )
+
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s [%(processName)s] %(message)s",
+        )
+        self.logger = logging.getLogger("Server")
+        self.logger.info(f"Get following configs:\n{yaml.dump(args.to_dict())}")
 
         if self.args.NUM_PROCESS > 0:  # type: ignore
             self.__init_mp__()
