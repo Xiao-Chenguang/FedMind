@@ -7,8 +7,8 @@ from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
 
 from fedmind.algs.fedavg import FedAvg
-from fedmind.data import ClientDataset
 from fedmind.config import get_config
+from fedmind.data import ClientDataset
 
 
 def test_fedavg():

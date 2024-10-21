@@ -1,9 +1,9 @@
-import os
 import logging
-import wandb
-import yaml
+import os
 
 import torch.multiprocessing as mp
+import wandb
+import yaml
 from torch import randperm
 from torch.nn import Module
 from torch.nn.modules.loss import _Loss

@@ -1,5 +1,6 @@
-from fedmind.config import get_config
 import yaml
+
+from fedmind.config import get_config
 
 
 def test_config():
