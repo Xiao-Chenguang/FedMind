@@ -96,7 +96,7 @@ wheels = [
 ]
 
 [[package]]
-name = "flair"
+name = "fedmind"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

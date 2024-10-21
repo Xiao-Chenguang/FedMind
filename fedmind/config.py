@@ -2,7 +2,7 @@ import argparse
 
 import yaml
 
-from flair.utils import EasyDict
+from fedmind.utils import EasyDict
 
 
 def dotodict(k: str, value):

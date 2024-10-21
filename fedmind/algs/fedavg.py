@@ -2,8 +2,8 @@ from torch.nn import Module
 from torch.nn.modules.loss import _Loss
 from torch.utils.data import DataLoader
 
-from flair.server import FedAlg
-from flair.utils import EasyDict
+from fedmind.server import FedAlg
+from fedmind.utils import EasyDict
 
 
 class FedAvg(FedAlg):

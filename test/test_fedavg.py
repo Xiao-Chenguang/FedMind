@@ -6,9 +6,9 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
 
-from flair.algs.fedavg import FedAvg
-from flair.data import ClientDataset
-from flair.config import get_config
+from fedmind.algs.fedavg import FedAvg
+from fedmind.data import ClientDataset
+from fedmind.config import get_config
 
 
 def test_fedavg():

@@ -1,4 +1,4 @@
-from flair.config import get_config
+from fedmind.config import get_config
 import yaml
 
 

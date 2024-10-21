@@ -11,7 +11,7 @@ from torch.optim import SGD
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from flair.utils import StateDict
+from fedmind.utils import StateDict
 
 
 def train(

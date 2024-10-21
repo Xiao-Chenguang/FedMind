@@ -1,5 +1,5 @@
 [project]
-name = "flair"
+name = "fedmind"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-new = "flair:main"
+new = "fedmind:main"
 
 [build-system]
 requires = ["hatchling"]

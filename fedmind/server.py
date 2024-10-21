@@ -10,8 +10,8 @@ from torch.nn.modules.loss import _Loss
 from torch.optim import SGD
 from torch.utils.data import DataLoader
 
-from flair.client import test, train, train_process
-from flair.utils import EasyDict, StateDict
+from fedmind.client import test, train, train_process
+from fedmind.utils import EasyDict, StateDict
 
 
 class FedAlg:
@@ -48,7 +48,7 @@ class FedAlg:
 
         self.wb_run = wandb.init(
             mode="offline",
-            project=args.get("WB_PROJECT", "flair"),
+            project=args.get("WB_PROJECT", "fedmind"),
             entity=args.get("WB_ENTITY", "wandb"),
             config=self.args.to_dict(),
             settings=wandb.Settings(_disable_stats=True, _disable_machine_info=True),
