@@ -17,7 +17,7 @@ You can refer to the [config.yaml](./config.yaml) as an example.
 There are examples in the [examples](./examples) directory.
 
 
-Make a copy of both the [config.yaml](./config.yaml) and [fedavg_demo.py](./example/fedavg_demo.py) to your own directory.
+Make a copy of both the [config.yaml](./config.yaml) and [fedavg_demo.py](./examples/fedavg_demo.py) to your own directory.
  You can run them with the following command:
 ```bash
 python fedavg_demo.py
