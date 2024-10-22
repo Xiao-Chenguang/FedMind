@@ -55,7 +55,7 @@ class FedAlg:
         )
 
         logging.basicConfig(
-            level=logging.INFO,
+            level=args.LOG_LEVEL,  # type: ignore
             format="%(asctime)s [%(processName)s] %(message)s",
         )
         self.logger = logging.getLogger("Server")

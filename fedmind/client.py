@@ -106,6 +106,7 @@ def train_process(
     optim: dict,
     criterion: _Loss,
     epochs: int,
+    log_level: int = 30,
 ):
     """Train process for multi-process environment.
 
@@ -119,7 +120,7 @@ def train_process(
         epochs: The number of epochs to train the model.
     """
     logging.basicConfig(
-        level=logging.INFO,
+        level=log_level,
         format="%(asctime)s [%(processName)s] %(message)s",
     )
     logger = logging.getLogger(f"Worker-{worker_id}")
