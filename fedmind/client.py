@@ -42,7 +42,7 @@ def train(
     cost = 0.0
     model.train()
     for epoch in range(epochs):
-        logger.info(f"Epoch {epoch + 1}/{epochs}")
+        logger.debug(f"Epoch {epoch + 1}/{epochs}")
         for inputs, labels in train_loader:
             optimizer.zero_grad()
             outputs = model(inputs)
