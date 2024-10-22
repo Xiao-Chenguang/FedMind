@@ -56,7 +56,7 @@ class FedAlg:
 
         logging.basicConfig(
             level=args.LOG_LEVEL,  # type: ignore
-            format="%(asctime)s [%(processName)s] %(message)s",
+            format="%(asctime)s %(levelname)s [%(processName)s] %(message)s",
         )
         self.logger = logging.getLogger("Server")
         self.logger.info(f"Get following configs:\n{yaml.dump(args.to_dict())}")
