@@ -85,6 +85,7 @@ class FedAlg:
                 self.args.OPTIM,  # type: ignore
                 self.criterion,
                 self.args.CLIENT_EPOCHS,  # type: ignore
+                self.args.LOG_LEVEL,  # type: ignore
             )
             p = mp.Process(target=train_process, args=args)
             p.start()
