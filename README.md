@@ -14,7 +14,7 @@ pip install fedmind
 A configuration file in `yaml` is required to run the experiments.
 You can refer to the [config.yaml](./config.yaml) as an example.
 
-There are examples in the [examples](./exmaples) directory.
+There are examples in the [examples](./examples) directory.
 
 
 Make a copy of both the [config.yaml](./config.yaml) and [fedavg_demo.py](./example/fedavg_demo.py) to your own directory.
