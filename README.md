@@ -29,9 +29,10 @@ After install `uv`, you can create a new environment and run a `FedMind` example
 ```bash
 uv init FL-demo
 cd FL-demo
-source .uv/bin/activate
 
+source .uv/bin/activate
 uv add fedmind torchvision
+
 wget https://raw.githubusercontent.com/Xiao-Chenguang/FedMind/refs/heads/main/examples/fedavg_demo.py
 wget https://raw.githubusercontent.com/Xiao-Chenguang/FedMind/refs/heads/main/config.yaml
 
