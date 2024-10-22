@@ -15,6 +15,10 @@ dependencies = [
 [project.scripts]
 new = "fedmind:main"
 
+[project.urls]
+Homepage = "https://github.com/Xiao-Chenguang/FedMind"
+Issues = "https://github.com/Xiao-Chenguang/FedMind/issues"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
