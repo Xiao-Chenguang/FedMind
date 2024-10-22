@@ -88,23 +88,31 @@ wheels = [
 
 [[package]]
 name = "fedmind"
-version = "0.1.1a1"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
-    { name = "pytest" },
     { name = "torch" },
-    { name = "torchvision" },
     { name = "wandb" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "torchvision" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "numpy", specifier = ">=2.1.2" },
-    { name = "pytest", specifier = ">=8.3.3" },
     { name = "torch", specifier = ">=2.4.1" },
-    { name = "torchvision", specifier = ">=0.19.1" },
     { name = "wandb", specifier = ">=0.18.5" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.3.3" },
+    { name = "torchvision", specifier = ">=0.19.1" },
 ]
 
 [[package]]
