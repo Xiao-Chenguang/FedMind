@@ -121,7 +121,7 @@ def train_process(
     """
     logging.basicConfig(
         level=log_level,
-        format="%(asctime)s [%(processName)s] %(message)s",
+        format="%(asctime)s %(levelname)s [%(processName)s] %(message)s",
     )
     logger = logging.getLogger(f"Worker-{worker_id}")
     logger.info(f"Worker-{worker_id} started.")
