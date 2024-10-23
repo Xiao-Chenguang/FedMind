@@ -42,7 +42,7 @@ class FedAlg:
         self.args = args
 
         self.gm_params = self.model.state_dict(destination=StateDict())
-        optim: dict = self.args.OPTIM  # type: ignore
+        optim: dict = self.args.OPTIM
         if optim["NAME"] == "SGD":
             self.optimizer = SGD(self.model.parameters(), lr=optim["LR"])
         else:
@@ -57,13 +57,13 @@ class FedAlg:
         )
 
         logging.basicConfig(
-            level=args.LOG_LEVEL,  # type: ignore
+            level=args.LOG_LEVEL,
             format="%(asctime)s %(levelname)s [%(processName)s] %(message)s",
         )
         self.logger = logging.getLogger("Server")
         self.logger.info(f"Get following configs:\n{yaml.dump(args.to_dict())}")
 
-        if self.args.NUM_PROCESS > 0:  # type: ignore
+        if self.args.NUM_PROCESS > 0:
             self.__init_mp__()
 
     def __init_mp__(self):
@@ -78,17 +78,17 @@ class FedAlg:
 
         # Start client processes
         self.processes = []
-        for worker_id in range(self.args.NUM_PROCESS):  # type: ignore
+        for worker_id in range(self.args.NUM_PROCESS):
             args = (
                 worker_id,
                 self.task_queue,
                 self.result_queue,
                 self._train_client,
                 self.model,
-                self.args.OPTIM,  # type: ignore
+                self.args.OPTIM,
                 self.criterion,
-                self.args.CLIENT_EPOCHS,  # type: ignore
-                self.args.LOG_LEVEL,  # type: ignore
+                self.args.CLIENT_EPOCHS,
+                self.args.LOG_LEVEL,
                 self.args,
             )
             p = mp.Process(target=self._create_worker_process, args=args)
@@ -99,7 +99,7 @@ class FedAlg:
         """Terminate multi-process environment."""
 
         # Terminate all client processes
-        for _ in range(self.args.NUM_PROCESS):  # type: ignore
+        for _ in range(self.args.NUM_PROCESS):
             self.task_queue.put("STOP")
 
         # Wait for all client processes to finish
@@ -176,7 +176,7 @@ class FedAlg:
 
             # 2. Synchornous clients training
             updates = []
-            if self.args.NUM_PROCESS == 0:  # type: ignore
+            if self.args.NUM_PROCESS == 0:
                 # Serial simulation instead of parallel
                 for cid in clients:
                     updates.append(
@@ -186,7 +186,7 @@ class FedAlg:
                             self.fed_loader[cid],
                             self.optimizer,
                             self.criterion,
-                            self.args.CLIENT_EPOCHS,  # type: ignore
+                            self.args.CLIENT_EPOCHS,
                             self.logger,
                             self.args,
                         )
@@ -208,7 +208,7 @@ class FedAlg:
             self.wb_run.log(train_metrics | test_metrics)
 
         # Terminate multi-process environment
-        if self.args.NUM_PROCESS > 0:  # type: ignore
+        if self.args.NUM_PROCESS > 0:
             self.__del_mp__()
 
         # Finish wandb run and sync

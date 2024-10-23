@@ -54,7 +54,7 @@ class FedProx(FedAvg):
         Returns:
             A dictionary containing the trained model parameters.
         """
-        mu = args.PROX_MU  # type: ignore
+        mu = args.PROX_MU
 
         # Train the model
         model.load_state_dict(gm_params)

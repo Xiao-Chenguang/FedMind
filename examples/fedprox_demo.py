@@ -20,8 +20,8 @@ def test_fedavg():
     org_ds = MNIST("dataset", train=True, download=True, transform=ToTensor())
     test_ds = MNIST("dataset", train=False, download=True, transform=ToTensor())
 
-    effective_size = len(org_ds) - len(org_ds) % args.NUM_CLIENT  # type: ignore
-    idx_groups = torch.randperm(effective_size).reshape(args.NUM_CLIENT, -1)  # type: ignore
+    effective_size = len(org_ds) - len(org_ds) % args.NUM_CLIENT
+    idx_groups = torch.randperm(effective_size).reshape(args.NUM_CLIENT, -1)
     fed_dss = [ClientDataset(org_ds, idx) for idx in idx_groups.tolist()]
 
     fed_loader = [DataLoader(ds, batch_size=32, shuffle=True) for ds in fed_dss]
@@ -46,7 +46,7 @@ def test_fedavg():
         test_loader=test_loader,
         criterion=criterion,
         args=args,
-    ).fit(args.NUM_CLIENT, args.ACTIVE_CLIENT, args.SERVER_EPOCHS)  # type: ignore
+    ).fit(args.NUM_CLIENT, args.ACTIVE_CLIENT, args.SERVER_EPOCHS)
 
 
 if __name__ == "__main__":
