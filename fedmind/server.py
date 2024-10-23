@@ -89,6 +89,7 @@ class FedAlg:
                 self.criterion,
                 self.args.CLIENT_EPOCHS,  # type: ignore
                 self.args.LOG_LEVEL,  # type: ignore
+                self.args,
             )
             p = mp.Process(target=self._create_worker_process, args=args)
             p.start()
@@ -187,6 +188,7 @@ class FedAlg:
                             self.criterion,
                             self.args.CLIENT_EPOCHS,  # type: ignore
                             self.logger,
+                            self.args,
                         )
                     )
             else:
@@ -222,6 +224,7 @@ class FedAlg:
         criterion: _Loss,
         epochs: int,
         logger: logging.Logger,
+        args: EasyDict,
     ) -> dict[str, Any]:
         """Train the model with given environment.
 
@@ -268,7 +271,8 @@ class FedAlg:
         optim: dict,
         criterion: _Loss,
         epochs: int,
-        log_level: int = 30,
+        log_level: int,
+        args: EasyDict,
     ):
         """Train process for multi-process environment.
 
@@ -299,6 +303,6 @@ class FedAlg:
             else:
                 parm, loader = task
                 result = client_func(
-                    model, parm, loader, optimizer, criterion, epochs, logger
+                    model, parm, loader, optimizer, criterion, epochs, logger, args
                 )
                 result_queue.put(result)
