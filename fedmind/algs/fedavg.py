@@ -18,7 +18,7 @@ class FedAvg(FedAlg):
         args: EasyDict,
     ):
         super().__init__(model, fed_loader, test_loader, criterion, args)
-        self.logger.info("Start Federated Averaging.")
+        self.logger.info(f"Start {self.__class__.__name__}.")
 
     def _aggregate_updates(self, updates: list[dict]) -> dict:
         """Aggregate updates to new model.
