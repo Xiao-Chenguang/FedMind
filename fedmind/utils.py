@@ -262,6 +262,13 @@ class EasyDict(dict):
 
     __setitem__ = __setattr__
 
+    def __getattr__(self, name):
+        if name in self:
+            return self[name]
+        raise AttributeError(
+            f"'{type(self).__name__}' object has no attribute '{name}'"
+        )
+
     def update(self, e=None, **f):
         d = e or dict()
         d.update(f)
