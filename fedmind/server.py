@@ -83,7 +83,7 @@ class FedAlg:
                 worker_id,
                 self.task_queue,
                 self.result_queue,
-                self._train_cliend,
+                self._train_client,
                 self.model,
                 self.args.OPTIM,  # type: ignore
                 self.criterion,
@@ -179,7 +179,7 @@ class FedAlg:
                 # Serial simulation instead of parallel
                 for cid in clients:
                     updates.append(
-                        self._train_cliend(
+                        self._train_client(
                             self.model,
                             self.gm_params,
                             self.fed_loader[cid],
@@ -214,7 +214,7 @@ class FedAlg:
         os.system(f"wandb sync {os.path.dirname(self.wb_run.dir)}")
 
     @staticmethod
-    def _train_cliend(
+    def _train_client(
         model: Module,
         gm_params: StateDict,
         train_loader: DataLoader,
