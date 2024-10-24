@@ -94,6 +94,7 @@ class FedAlg:
                 self.args,
             ),
         )
+        self.logger.debug(f"Started {self.args.NUM_PROCESS} worker processes.")
 
     def __del_mp__(self):
         """Terminate multi-process environment."""
