@@ -35,7 +35,7 @@ class FedAlg:
         criterion: _Loss,
         args: EasyDict,
     ):
-        self.model = model
+        self.model = model.to(args.DEVICE)
         self.fed_loader = fed_loader
         self.test_loader = test_loader
         self.criterion = criterion
@@ -148,6 +148,8 @@ class FedAlg:
         model.eval()
         with torch.no_grad():
             for inputs, labels in test_loader:
+                inputs = inputs.to(self.args.DEVICE)
+                labels = labels.to(self.args.DEVICE)
                 outputs = model(inputs)
                 loss: Tensor = criterion(outputs, labels)
                 total_loss += loss.item()
@@ -247,6 +249,8 @@ class FedAlg:
         for epoch in range(epochs):
             logger.debug(f"Epoch {epoch + 1}/{epochs}")
             for inputs, labels in train_loader:
+                inputs = inputs.to(args.DEVICE)
+                labels = labels.to(args.DEVICE)
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss: Tensor = criterion(outputs, labels)

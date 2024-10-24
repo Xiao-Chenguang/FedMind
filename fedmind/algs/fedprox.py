@@ -1,5 +1,5 @@
-from typing import Any
 import logging
+from typing import Any
 
 from torch import Tensor
 from torch.nn import Module
@@ -7,10 +7,8 @@ from torch.nn.modules.loss import _Loss
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from fedmind.utils import EasyDict, StateDict
-
-
 from fedmind.algs.fedavg import FedAvg
+from fedmind.utils import EasyDict, StateDict
 
 
 class FedProx(FedAvg):
@@ -63,6 +61,8 @@ class FedProx(FedAvg):
         for epoch in range(epochs):
             logger.debug(f"Epoch {epoch + 1}/{epochs}")
             for inputs, labels in train_loader:
+                inputs = inputs.to(args.DEVICE)
+                labels = labels.to(args.DEVICE)
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss: Tensor = criterion(outputs, labels)
