@@ -73,6 +73,7 @@ class FedAlg:
         """
 
         # Create queues for task distribution and result collection
+        mp.set_start_method("spawn")
         self.task_queue = mp.Queue()
         self.result_queue = mp.Queue()
 
