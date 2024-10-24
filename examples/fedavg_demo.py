@@ -23,8 +23,8 @@ def test_fedavg():
     idx_groups = torch.randperm(effective_size).reshape(args.NUM_CLIENT, -1)
     fed_dss = [ClientDataset(org_ds, idx) for idx in idx_groups.tolist()]
 
-    fed_loader = [DataLoader(ds, batch_size=32, shuffle=True) for ds in fed_dss]
-    test_loader = DataLoader(test_ds, batch_size=32)
+    fed_loader = [DataLoader(ds, args.BATCH_SIZE, shuffle=True) for ds in fed_dss]
+    test_loader = DataLoader(test_ds, args.BATCH_SIZE * 4)
 
     # 2. Prepare Model and Criterion
     classes = 10
