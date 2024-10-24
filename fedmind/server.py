@@ -1,12 +1,12 @@
-from typing import Any, Callable
 import logging
 import os
+from typing import Any, Callable
 
+import torch
 import torch.multiprocessing as mp
 import wandb
-import torch
 import yaml
-from torch import randperm, Tensor
+from torch import Tensor, randperm
 from torch.nn import Module
 from torch.nn.modules.loss import _Loss
 from torch.optim import SGD
