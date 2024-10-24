@@ -29,3 +29,6 @@ dev-dependencies = [
     "pytest>=8.3.3",
     "torchvision>=0.19.1",
 ]
+
+[tool.ruff.isort]
+known-third-party = ["wandb"]
