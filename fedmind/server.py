@@ -78,10 +78,11 @@ class FedAlg:
         self.result_queue = mp.Queue()
 
         # Start client processes
-        self.processes = []
-        for worker_id in range(self.args.NUM_PROCESS):
-            args = (
-                worker_id,
+        self._processes = mp.spawn(
+            self._create_worker_process,
+            nprocs=self.args.NUM_PROCESS,
+            join=False,  # Do not wait for processes to finish
+            args=(
                 self.task_queue,
                 self.result_queue,
                 self._train_client,
@@ -91,10 +92,8 @@ class FedAlg:
                 self.args.CLIENT_EPOCHS,
                 self.args.LOG_LEVEL,
                 self.args,
-            )
-            p = mp.Process(target=self._create_worker_process, args=args)
-            p.start()
-            self.processes.append(p)
+            ),
+        )
 
     def __del_mp__(self):
         """Terminate multi-process environment."""
@@ -104,8 +103,8 @@ class FedAlg:
             self.task_queue.put("STOP")
 
         # Wait for all client processes to finish
-        for p in self.processes:
-            p.join()
+        assert self._processes is not None, "Worker processes no found."
+        self._processes.join()
 
     def _select_clients(self, pool: int, num_clients: int) -> list[int]:
         """Select active clients from the pool.
