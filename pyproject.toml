@@ -26,6 +26,7 @@ reportPrivateImportUsage = "none"
 
 [tool.uv]
 dev-dependencies = [
+    "ipykernel>=6.29.5",
     "pytest>=8.3.3",
     "torchvision>=0.19.1",
 ]
