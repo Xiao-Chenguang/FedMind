@@ -35,20 +35,20 @@ class FedAlg:
         criterion: _Loss,
         args: EasyDict,
     ):
-        self.model = model.to(args.DEVICE)
-        self.fed_loader = fed_loader
-        self.test_loader = test_loader
-        self.criterion = criterion
+        self._model = model.to(args.DEVICE)
+        self._fed_loader = fed_loader
+        self._test_loader = test_loader
+        self._criterion = criterion
         self.args = args
 
-        self.gm_params = self.model.state_dict(destination=StateDict())
+        self._gm_params = self._model.state_dict(destination=StateDict())
         optim: dict = self.args.OPTIM
         if optim["NAME"] == "SGD":
-            self.optimizer = SGD(self.model.parameters(), lr=optim["LR"])
+            self._optimizer = SGD(self._model.parameters(), lr=optim["LR"])
         else:
             raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
 
-        self.wb_run = wandb.init(
+        self.__wb_run = wandb.init(
             mode="offline",
             project=args.get("WB_PROJECT", "fedmind"),
             entity=args.get("WB_ENTITY", "wandb"),
@@ -74,9 +74,9 @@ class FedAlg:
 
         # Create queues for task distribution and result collection
         mp.set_start_method("spawn")
-        self.task_queue = mp.Queue()
-        self.result_queue = mp.Queue()
-        self.test_queue = mp.Queue()
+        self.__task_queue = mp.Queue()
+        self.__result_queue = mp.Queue()
+        self.__test_queue = mp.Queue()
 
         # Start client processes
         self._processes = mp.spawn(
@@ -84,14 +84,14 @@ class FedAlg:
             nprocs=self.args.NUM_PROCESS,
             join=False,  # Do not wait for processes to finish
             args=(
-                self.task_queue,
-                self.result_queue,
-                self.test_queue,
+                self.__task_queue,
+                self.__result_queue,
+                self.__test_queue,
                 self._train_client,
                 self._test_server,
-                self.model,
+                self._model,
                 self.args.OPTIM,
-                self.criterion,
+                self._criterion,
                 self.args.CLIENT_EPOCHS,
                 self.args.LOG_LEVEL,
                 self.args,
@@ -104,7 +104,7 @@ class FedAlg:
 
         # Terminate all client processes
         for _ in range(self.args.NUM_PROCESS):
-            self.task_queue.put(("STOP",))
+            self.__task_queue.put(("STOP",))
 
         # Wait for all client processes to finish
         assert self._processes is not None, "Worker processes no found."
@@ -141,15 +141,15 @@ class FedAlg:
         """
         if self.args.NUM_PROCESS == 0 or not self.args.TEST_SUBPROCESS:
             return self._test_server(
-                self.model,
-                self.gm_params,
-                self.test_loader,
-                self.criterion,
+                self._model,
+                self._gm_params,
+                self._test_loader,
+                self._criterion,
                 self.logger,
                 self.args,
             )
         else:
-            return self.test_queue.get()
+            return self.__test_queue.get()
 
     @staticmethod
     def _test_server(
@@ -215,11 +215,11 @@ class FedAlg:
                 for cid in clients:
                     updates.append(
                         self._train_client(
-                            self.model,
-                            self.gm_params,
-                            self.fed_loader[cid],
-                            self.optimizer,
-                            self.criterion,
+                            self._model,
+                            self._gm_params,
+                            self._fed_loader[cid],
+                            self._optimizer,
+                            self._criterion,
                             self.args.CLIENT_EPOCHS,
                             self.logger,
                             self.args,
@@ -228,11 +228,13 @@ class FedAlg:
             else:
                 # Parallel simulation with torch.multiprocessing
                 if self.args.TEST_SUBPROCESS:
-                    self.task_queue.put(("TEST", self.gm_params, self.test_loader))
+                    self.__task_queue.put(("TEST", self._gm_params, self._test_loader))
                 for cid in range(num_clients):
-                    self.task_queue.put(("TRAIN", self.gm_params, self.fed_loader[cid]))
+                    self.__task_queue.put(
+                        ("TRAIN", self._gm_params, self._fed_loader[cid])
+                    )
                 for cid in range(num_clients):
-                    updates.append(self.result_queue.get())
+                    updates.append(self.__result_queue.get())
 
             # 3. Aggregate updates to new model
             train_metrics = self._aggregate_updates(updates)
@@ -242,15 +244,15 @@ class FedAlg:
             test_metrics = self._evaluate()
 
             # 5. Log metrics
-            self.wb_run.log(train_metrics | test_metrics)
+            self.__wb_run.log(train_metrics | test_metrics)
 
         # Terminate multi-process environment
         if self.args.NUM_PROCESS > 0:
             self.__del_mp__()
 
         # Finish wandb run and sync
-        self.wb_run.finish()
-        os.system(f"wandb sync {os.path.dirname(self.wb_run.dir)}")
+        self.__wb_run.finish()
+        os.system(f"wandb sync {os.path.dirname(self.__wb_run.dir)}")
 
     @staticmethod
     def _train_client(
