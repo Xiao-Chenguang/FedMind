@@ -76,6 +76,7 @@ class FedAlg:
         mp.set_start_method("spawn")
         self.task_queue = mp.Queue()
         self.result_queue = mp.Queue()
+        self.test_queue = mp.Queue()
 
         # Start client processes
         self._processes = mp.spawn(
@@ -85,7 +86,9 @@ class FedAlg:
             args=(
                 self.task_queue,
                 self.result_queue,
+                self.test_queue,
                 self._train_client,
+                self._test_server,
                 self.model,
                 self.args.OPTIM,
                 self.criterion,
@@ -101,7 +104,7 @@ class FedAlg:
 
         # Terminate all client processes
         for _ in range(self.args.NUM_PROCESS):
-            self.task_queue.put("STOP")
+            self.task_queue.put(("STOP",))
 
         # Wait for all client processes to finish
         assert self._processes is not None, "Worker processes no found."
@@ -136,11 +139,39 @@ class FedAlg:
         Returns:
             The evaluation metrics.
         """
-        model: Module = self.model
-        gm_params: StateDict = self.gm_params
-        test_loader: DataLoader = self.test_loader
-        criterion: _Loss = self.criterion
-        logger: logging.Logger = self.logger
+        if self.args.NUM_PROCESS == 0 or not self.args.TEST_SUBPROCESS:
+            return self._test_server(
+                self.model,
+                self.gm_params,
+                self.test_loader,
+                self.criterion,
+                self.logger,
+                self.args,
+            )
+        else:
+            return self.test_queue.get()
+
+    @staticmethod
+    def _test_server(
+        model: Module,
+        gm_params: StateDict,
+        test_loader: DataLoader,
+        criterion: _Loss,
+        logger: logging.Logger,
+        args: EasyDict,
+    ) -> dict:
+        """Test the model.
+
+        Args:
+            model: The model to test.
+            gm_params: The global model parameters.
+            test_loader: The DataLoader object that contains the test data.
+            criterion: The loss function to use.
+            logger: The logger object to log the testing process.
+
+        Returns:
+            The evaluation metrics.
+        """
 
         total_loss = 0
         correct = 0
@@ -149,8 +180,8 @@ class FedAlg:
         model.eval()
         with torch.no_grad():
             for inputs, labels in test_loader:
-                inputs = inputs.to(self.args.DEVICE)
-                labels = labels.to(self.args.DEVICE)
+                inputs = inputs.to(args.DEVICE)
+                labels = labels.to(args.DEVICE)
                 outputs = model(inputs)
                 loss: Tensor = criterion(outputs, labels)
                 total_loss += loss.item()
@@ -196,8 +227,10 @@ class FedAlg:
                     )
             else:
                 # Parallel simulation with torch.multiprocessing
+                if self.args.TEST_SUBPROCESS:
+                    self.task_queue.put(("TEST", self.gm_params, self.test_loader))
                 for cid in range(num_clients):
-                    self.task_queue.put((self.gm_params, self.fed_loader[cid]))
+                    self.task_queue.put(("TRAIN", self.gm_params, self.fed_loader[cid]))
                 for cid in range(num_clients):
                     updates.append(self.result_queue.get())
 
@@ -272,7 +305,9 @@ class FedAlg:
         worker_id: int,
         task_queue: mp.Queue,
         result_queue: mp.Queue,
-        client_func: Callable,
+        test_queue: mp.Queue,
+        train_func: Callable,
+        test_func: Callable,
         model: Module,
         optim: dict,
         criterion: _Loss,
@@ -304,11 +339,17 @@ class FedAlg:
             raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
         while True:
             task = task_queue.get()
-            if task == "STOP":
+            if task[0] == "STOP":
                 break
-            else:
-                parm, loader = task
-                result = client_func(
+            elif task[0] == "TRAIN":
+                _, parm, loader = task
+                result = train_func(
                     model, parm, loader, optimizer, criterion, epochs, logger, args
                 )
                 result_queue.put(result)
+            elif task[0] == "TEST":
+                _, parm, loader = task
+                result = test_func(model, parm, loader, criterion, logger, args)
+                test_queue.put(result)
+            else:
+                raise ValueError(f"Unknown task type {task[0]}")
