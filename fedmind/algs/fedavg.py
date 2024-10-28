@@ -31,6 +31,6 @@ class FedAvg(FedAlg):
         """
         agg_update = sum([update["model_update"] for update in updates]) / len(updates)
         agg_loss = sum([update["train_loss"] for update in updates]) / len(updates)
-        self.gm_params += agg_update
+        self._gm_params += agg_update
         self.logger.info(f"Train loss: {agg_loss:.4f}")
         return {"train_loss": agg_loss}
