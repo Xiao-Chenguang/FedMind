@@ -229,11 +229,11 @@ class FedAlg:
                 # Parallel simulation with torch.multiprocessing
                 if self.args.TEST_SUBPROCESS:
                     self.__task_queue.put(("TEST", self._gm_params, self._test_loader))
-                for cid in range(num_clients):
+                for cid in clients:
                     self.__task_queue.put(
                         ("TRAIN", self._gm_params, self._fed_loader[cid])
                     )
-                for cid in range(num_clients):
+                for cid in clients:
                     updates.append(self.__result_queue.get())
 
             # 3. Aggregate updates to new model
