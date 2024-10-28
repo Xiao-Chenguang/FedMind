@@ -31,5 +31,5 @@ dev-dependencies = [
     "torchvision>=0.19.1",
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-third-party = ["wandb"]
