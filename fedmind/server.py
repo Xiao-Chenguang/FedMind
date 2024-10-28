@@ -42,7 +42,7 @@ class FedAlg:
         self._criterion = criterion
         self.args = args
 
-        self._gm_params = self._model.state_dict(destination=StateDict())
+        self._gm_params = self._model.state_dict(destination=StateDict()) * 1
         optim: dict = self.args.OPTIM
         if optim["NAME"] == "SGD":
             self._optimizer = SGD(self._model.parameters(), lr=optim["LR"])

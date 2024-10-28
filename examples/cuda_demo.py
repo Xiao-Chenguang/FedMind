@@ -9,13 +9,16 @@ from fedmind.config import get_config
 from fedmind.data import ClientDataset
 
 
-def test_fedavg():
+def test_fedavg_cuda():
     # 0. Prepare necessary arguments
     args = get_config("config.yaml")
     args.DEVICE = "cuda"
     args.ACTIVE_CLIENT = 10
     args.NUM_PROCESS = 10
     args.SERVER_EPOCHS = 20
+
+    if args.SEED >= 0:
+        torch.manual_seed(args.SEED)
 
     assert torch.cuda.is_available(), "CUDA is not available"
 
@@ -27,7 +30,14 @@ def test_fedavg():
     idx_groups = torch.randperm(effective_size).reshape(args.NUM_CLIENT, -1)
     fed_dss = [ClientDataset(org_ds, idx) for idx in idx_groups.tolist()]
 
-    fed_loader = [DataLoader(ds, args.BATCH_SIZE, shuffle=True) for ds in fed_dss]
+    genetors = [
+        torch.Generator().manual_seed(args.SEED + i) if args.SEED >= 0 else None
+        for i in range(args.NUM_CLIENT)
+    ]
+    fed_loader = [
+        DataLoader(ds, args.BATCH_SIZE, shuffle=True, generator=gtr)
+        for ds, gtr in zip(fed_dss, genetors)
+    ]
     test_loader = DataLoader(test_ds, args.BATCH_SIZE * 4)
 
     # 2. Prepare Model and Criterion
@@ -58,4 +68,4 @@ def test_fedavg():
 
 
 if __name__ == "__main__":
-    test_fedavg()
+    test_fedavg_cuda()
