@@ -139,7 +139,7 @@ class FedAlg:
         Returns:
             The evaluation metrics.
         """
-        if self.args.NUM_PROCESS == 0:
+        if self.args.NUM_PROCESS == 0 or not self.args.TEST_SUBPROCESS:
             return self._test_server(
                 self.model,
                 self.gm_params,
@@ -227,7 +227,8 @@ class FedAlg:
                     )
             else:
                 # Parallel simulation with torch.multiprocessing
-                self.task_queue.put(("TEST", self.gm_params, self.test_loader))
+                if self.args.TEST_SUBPROCESS:
+                    self.task_queue.put(("TEST", self.gm_params, self.test_loader))
                 for cid in range(num_clients):
                     self.task_queue.put(("TRAIN", self.gm_params, self.fed_loader[cid]))
                 for cid in range(num_clients):

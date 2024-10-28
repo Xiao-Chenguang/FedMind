@@ -12,5 +12,6 @@ OPTIM:
   MOMENTUM: 0.9
   NAME: SGD
 SERVER_EPOCHS: 20
+TEST_SUBPROCESS: false
 WB_ENTITY: example_entity
 WB_PROJECT: example_project
