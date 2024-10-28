@@ -9,7 +9,7 @@ from fedmind.config import get_config
 from fedmind.data import ClientDataset
 
 
-def test_fedavg():
+def test_fedavg_cuda():
     # 0. Prepare necessary arguments
     args = get_config("config.yaml")
     args.DEVICE = "cuda"
@@ -68,4 +68,4 @@ def test_fedavg():
 
 
 if __name__ == "__main__":
-    test_fedavg()
+    test_fedavg_cuda()
