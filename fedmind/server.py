@@ -1,5 +1,6 @@
 import logging
 import os
+from copy import deepcopy
 from typing import Any, Callable
 
 import torch
@@ -335,6 +336,7 @@ class FedAlg:
         )
         logger = logging.getLogger(f"Worker-{worker_id}")
         logger.info(f"Worker-{worker_id} started.")
+        model = deepcopy(model)
         if optim["NAME"] == "SGD":
             optimizer = SGD(model.parameters(), lr=optim["LR"])
         else:
