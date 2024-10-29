@@ -9,6 +9,22 @@ dependencies = [
     "torch>=2.4.1",
     "wandb>=0.18.5",
 ]
+authors = [
+    { name = "Xiao Chenguang", email = "xiaochenguang0719@qq.com" },
+]
+license = { file = "LICENSE" }
+keywords = ["federated-learning", "research", "framework"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 
 [project.scripts]
 new = "fedmind:main"

@@ -1,4 +1,10 @@
 # FedMind
+
+[![image](https://img.shields.io/pypi/v/FedMind.svg)](https://pypi.python.org/pypi/FedMind)
+[![image](https://img.shields.io/pypi/l/FedMind.svg)](https://github.com/Xiao-Chenguang/FedMind/LICENSE)
+[![image](https://img.shields.io/pypi/pyversions/FedMind.svg)](https://pypi.python.org/pypi/FedMind)
+[![Actions status](https://github.com/Xiao-Chenguang/FedMind/workflows/Ruff/badge.svg)](https://github.com/Xiao-Chenguang/FedMind/actions)
+
 A simple and easy Federated Learning framework fit researchers' mind based on [PyTorch](https://pytorch.org/).
 
 Unlike other popular FL frameworks focusing on production, `FedMind` is designed for researchers to easily implement their own FL algorithms and experiments. It provides a simple and flexible interface to implement FL algorithms and experiments.
