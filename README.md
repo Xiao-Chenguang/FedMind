@@ -47,6 +47,16 @@ uv run python fedavg_demo.py
 
 
 ## Features
+- **Simple**: Easy to implement your own FL algorithms and experiments.
+- **PyTorch**: Based on [PyTorch](https://pytorch.org/), a popular deep learning framework.
+- **Multi-Platform**: Support both *Linux*, *macOS* and *Windows*.
+- **CPU/GPU**: Support both **CPU** and **GPU** training.
+- **Serial/Parallel**: Support both serial and parallel training modes.
+- **Model Operation**: Support model level operations like `+`, `-`, `*`, `/`.
+- **Reproducible**: Reproduce your experiments with the `configuration file` and `seed`.
+
+
+### Serial/Parallel Training
 This FL framework provides two client simulation modes depending on your resources:
 - Parallel training speed up for powerful resources.
 - Serialization for limited resources.
