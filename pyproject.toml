@@ -30,6 +30,7 @@ new = "fedmind:main"
 
 [project.urls]
 Homepage = "https://github.com/Xiao-Chenguang/FedMind"
+Releases = "https://github.com/Xiao-Chenguang/FedMind/releases"
 Issues = "https://github.com/Xiao-Chenguang/FedMind/issues"
 
 [build-system]
