@@ -270,6 +270,8 @@ class FedAlg:
         epochs: int,
         logger: logging.Logger,
         args: EasyDict,
+        *args_,
+        **kwargs,
     ) -> dict[str, Any]:
         """Train the model with given environment.
 
