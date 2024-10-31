@@ -45,7 +45,12 @@ class FedAlg:
         self._gm_params = self._model.state_dict(destination=StateDict()) * 1
         optim: dict = self.args.OPTIM
         if optim["NAME"] == "SGD":
-            self._optimizer = SGD(self._model.parameters(), lr=optim["LR"])
+            self._optimizer = SGD(
+                self._model.parameters(),
+                lr=optim["LR"],
+                momentum=optim.get("MOMENTUM", 0),
+                dampening=optim.get("DAMPENING", 0),
+            )
         else:
             raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
 
