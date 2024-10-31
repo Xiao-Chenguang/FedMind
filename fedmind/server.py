@@ -49,7 +49,7 @@ class FedAlg:
         else:
             raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
 
-        self.__wb_run = wandb.init(
+        self._wb_run = wandb.init(
             mode="offline",
             project=args.get("WB_PROJECT", "fedmind"),
             entity=args.get("WB_ENTITY", "wandb"),
@@ -75,9 +75,9 @@ class FedAlg:
 
         # Create queues for task distribution and result collection
         mp.set_start_method("spawn")
-        self.__task_queue = mp.Queue()
-        self.__result_queue = mp.Queue()
-        self.__test_queue = mp.Queue()
+        self._task_queue = mp.Queue()
+        self._result_queue = mp.Queue()
+        self._test_queue = mp.Queue()
 
         # Start client processes
         self._processes = mp.spawn(
@@ -85,9 +85,9 @@ class FedAlg:
             nprocs=self.args.NUM_PROCESS,
             join=False,  # Do not wait for processes to finish
             args=(
-                self.__task_queue,
-                self.__result_queue,
-                self.__test_queue,
+                self._task_queue,
+                self._result_queue,
+                self._test_queue,
                 self._train_client,
                 self._test_server,
                 self._model,
@@ -105,7 +105,7 @@ class FedAlg:
 
         # Terminate all client processes
         for _ in range(self.args.NUM_PROCESS):
-            self.__task_queue.put(("STOP",))
+            self._task_queue.put(("STOP",))
 
         # Wait for all client processes to finish
         assert self._processes is not None, "Worker processes no found."
@@ -150,7 +150,7 @@ class FedAlg:
                 self.args,
             )
         else:
-            return self.__test_queue.get()
+            return self._test_queue.get()
 
     @staticmethod
     def _test_server(
@@ -229,13 +229,13 @@ class FedAlg:
             else:
                 # Parallel simulation with torch.multiprocessing
                 if self.args.TEST_SUBPROCESS:
-                    self.__task_queue.put(("TEST", self._gm_params, self._test_loader))
+                    self._task_queue.put(("TEST", self._gm_params, self._test_loader))
                 for cid in clients:
-                    self.__task_queue.put(
+                    self._task_queue.put(
                         ("TRAIN", self._gm_params, self._fed_loader[cid])
                     )
                 for cid in clients:
-                    updates.append(self.__result_queue.get())
+                    updates.append(self._result_queue.get())
 
             # 3. Aggregate updates to new model
             train_metrics = self._aggregate_updates(updates)
@@ -245,15 +245,15 @@ class FedAlg:
             test_metrics = self._evaluate()
 
             # 5. Log metrics
-            self.__wb_run.log(train_metrics | test_metrics)
+            self._wb_run.log(train_metrics | test_metrics)
 
         # Terminate multi-process environment
         if self.args.NUM_PROCESS > 0:
             self.__del_mp__()
 
         # Finish wandb run and sync
-        self.__wb_run.finish()
-        os.system(f"wandb sync {os.path.dirname(self.__wb_run.dir)}")
+        self._wb_run.finish()
+        os.system(f"wandb sync {os.path.dirname(self._wb_run.dir)}")
 
     @staticmethod
     def _train_client(
