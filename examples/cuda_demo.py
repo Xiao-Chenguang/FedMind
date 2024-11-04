@@ -19,6 +19,8 @@ def test_fedavg_cuda():
 
     if args.SEED >= 0:
         torch.manual_seed(args.SEED)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
     assert torch.cuda.is_available(), "CUDA is not available"
 

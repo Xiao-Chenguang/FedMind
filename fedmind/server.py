@@ -343,6 +343,9 @@ class FedAlg:
         )
         logger = logging.getLogger(f"Worker-{worker_id}")
         logger.info(f"Worker-{worker_id} started.")
+        if args.SEED >= 0 and args.DEVICE == "cuda":
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
         model = deepcopy(model)
         if optim["NAME"] == "SGD":
             optimizer = SGD(model.parameters(), lr=optim["LR"])
