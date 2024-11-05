@@ -14,7 +14,8 @@ def test_fedavg_cuda():
     args = get_config("config.yaml")
     args.DEVICE = "cuda"
     args.ACTIVE_CLIENT = 10
-    args.NUM_PROCESS = 10
+    args.NUM_PROCESS = 11
+    args.TEST_SUBPROCESS = True
     args.SERVER_EPOCHS = 20
 
     if args.SEED >= 0:
