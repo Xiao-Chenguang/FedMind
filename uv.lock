@@ -299,7 +299,7 @@ wheels = [
 
 [[package]]
 name = "fedmind"
-version = "0.1.10"
+version = "0.1.11"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
@@ -307,7 +307,7 @@ dependencies = [
     { name = "wandb" },
 ]
 
-[package.dependency-groups]
+[package.dev-dependencies]
 dev = [
     { name = "datasets" },
     { name = "ipykernel" },
@@ -322,7 +322,7 @@ requires-dist = [
     { name = "wandb", specifier = ">=0.18.5" },
 ]
 
-[package.metadata.dependency-groups]
+[package.metadata.requires-dev]
 dev = [
     { name = "datasets", specifier = ">=3.1.0" },
     { name = "ipykernel", specifier = ">=6.29.5" },
