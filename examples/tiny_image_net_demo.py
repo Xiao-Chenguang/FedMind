@@ -24,6 +24,8 @@ def test_tiny_image_net_cuda(data_path: str = ""):
 
     if args.SEED >= 0:
         torch.manual_seed(args.SEED)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
     assert torch.cuda.is_available(), "CUDA is not available"
 
