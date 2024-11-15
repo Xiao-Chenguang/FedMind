@@ -3,6 +3,7 @@
 [![image](https://img.shields.io/pypi/v/fedmind.svg)](https://pypi.python.org/pypi/fedmind)
 [![image](https://img.shields.io/pypi/l/fedmind.svg)](https://github.com/Xiao-Chenguang/FedMind//blob/main/LICENSE)
 [![image](https://img.shields.io/pypi/pyversions/fedmind.svg)](https://pypi.python.org/pypi/fedmind)
+[![PyPI Downloads](https://static.pepy.tech/badge/fedmind)](https://pepy.tech/projects/fedmind)
 [![Actions status](https://github.com/Xiao-Chenguang/FedMind/workflows/Ruff/badge.svg)](https://github.com/Xiao-Chenguang/FedMind/actions)
 
 A simple and easy Federated Learning framework fit researchers' mind based on [PyTorch](https://pytorch.org/).
