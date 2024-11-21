@@ -66,3 +66,7 @@ This is controlled by the parameter `NUM_PROCESS` which can be set in the [confi
 Setting `NUM_PROCESS` to 0 will use the serialization mode where each client trains sequentially in same global round.
 Setting `NUM_PROCESS > 0` will use the parallel mode where `NUM_PROCESS` workers consume the clients tasks in parallel.
 The recommended value for `NUM_PROCESS` is the number of **CPU cores** available.
+
+## Acknowledgement
+- This project includes code from [easydict](https://github.com/makinacorpus/easydict), licensed under the GNU Lesser General Public License (LGPL) version 3.0.
+See the [easydict's LICENSE](https://github.com/makinacorpus/easydict?tab=LGPL-3.0-1-ov-file) for details.
