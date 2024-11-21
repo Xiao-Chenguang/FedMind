@@ -104,6 +104,12 @@ class StateDict(dict):
 
 class EasyDict(dict):
     """
+    An dot accessible dictionary.
+
+    Code modified from [easydict](https://github.com/makinacorpus/easydict) project.\\
+    Licensed under the LGPL version 3.0.
+
+
     Get attributes
 
     >>> d = EasyDict({'foo':3})
