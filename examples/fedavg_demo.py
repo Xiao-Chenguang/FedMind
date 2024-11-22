@@ -13,27 +13,27 @@ from fedmind.data import ClientDataset
 
 def test_fedavg():
     # 0. Prepare necessary arguments
-    args = get_config("config.yaml")
-    if args.SEED >= 0:
-        torch.manual_seed(args.SEED)
+    config = get_config("config.yaml")
+    if config.SEED >= 0:
+        torch.manual_seed(config.SEED)
 
     # 1. Prepare Federated Learning DataSets
     org_ds = MNIST("dataset", train=True, download=True, transform=ToTensor())
     test_ds = MNIST("dataset", train=False, download=True, transform=ToTensor())
 
-    effective_size = len(org_ds) - len(org_ds) % args.NUM_CLIENT
-    idx_groups = torch.randperm(effective_size).reshape(args.NUM_CLIENT, -1)
+    effective_size = len(org_ds) - len(org_ds) % config.NUM_CLIENT
+    idx_groups = torch.randperm(effective_size).reshape(config.NUM_CLIENT, -1)
     fed_dss = [ClientDataset(org_ds, idx) for idx in idx_groups.tolist()]
 
     genetors = [
-        torch.Generator().manual_seed(args.SEED + i) if args.SEED >= 0 else None
-        for i in range(args.NUM_CLIENT)
+        torch.Generator().manual_seed(config.SEED + i) if config.SEED >= 0 else None
+        for i in range(config.NUM_CLIENT)
     ]
     fed_loader = [
-        DataLoader(ds, args.BATCH_SIZE, shuffle=True, generator=gtr)
+        DataLoader(ds, config.BATCH_SIZE, shuffle=True, generator=gtr)
         for ds, gtr in zip(fed_dss, genetors)
     ]
-    test_loader = DataLoader(test_ds, args.BATCH_SIZE * 4)
+    test_loader = DataLoader(test_ds, config.BATCH_SIZE * 4)
 
     # 2. Prepare Model and Criterion
     classes = 10
@@ -53,8 +53,8 @@ def test_fedavg():
         fed_loader=fed_loader,
         test_loader=test_loader,
         criterion=criterion,
-        args=args,
-    ).fit(args.NUM_CLIENT, args.ACTIVE_CLIENT, args.SERVER_EPOCHS)
+        config=config,
+    ).fit(config.NUM_CLIENT, config.ACTIVE_CLIENT, config.SERVER_EPOCHS)
 
 
 if __name__ == "__main__":

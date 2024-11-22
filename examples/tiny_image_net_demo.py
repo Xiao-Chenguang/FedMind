@@ -13,17 +13,17 @@ from fedmind.data import ClientDataset
 def test_tiny_image_net_cuda(data_path: str = ""):
     assert data_path, "Please provide the path to the tiny-imagenet-200 dataset"
     # 0. Prepare necessary arguments
-    args = get_config("config.yaml")
-    args.DEVICE = "cuda"
-    args.ACTIVE_CLIENT = 10
-    args.NUM_PROCESS = 11
-    args.TEST_SUBPROCESS = True
-    args.SERVER_EPOCHS = 20
-    args.LOG_LEVEL = 10
-    args.SEED = 10
+    config = get_config("config.yaml")
+    config.DEVICE = "cuda"
+    config.ACTIVE_CLIENT = 10
+    config.NUM_PROCESS = 11
+    config.TEST_SUBPROCESS = True
+    config.SERVER_EPOCHS = 20
+    config.LOG_LEVEL = 10
+    config.SEED = 10
 
-    if args.SEED >= 0:
-        torch.manual_seed(args.SEED)
+    if config.SEED >= 0:
+        torch.manual_seed(config.SEED)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
@@ -51,19 +51,19 @@ def test_tiny_image_net_cuda(data_path: str = ""):
     org_ds = TensorDataset(train_image, train_label)
     test_ds = TensorDataset(test_image, test_label)
 
-    effective_size = len(org_ds) - len(org_ds) % args.NUM_CLIENT
-    idx_groups = torch.randperm(effective_size).reshape(args.NUM_CLIENT, -1)
+    effective_size = len(org_ds) - len(org_ds) % config.NUM_CLIENT
+    idx_groups = torch.randperm(effective_size).reshape(config.NUM_CLIENT, -1)
     fed_dss = [ClientDataset(org_ds, idx) for idx in idx_groups.tolist()]
 
     genetors = [
-        torch.Generator().manual_seed(args.SEED + i) if args.SEED >= 0 else None
-        for i in range(args.NUM_CLIENT)
+        torch.Generator().manual_seed(config.SEED + i) if config.SEED >= 0 else None
+        for i in range(config.NUM_CLIENT)
     ]
     fed_loader = [
-        DataLoader(ds, args.BATCH_SIZE, shuffle=True, generator=gtr)
+        DataLoader(ds, config.BATCH_SIZE, shuffle=True, generator=gtr)
         for ds, gtr in zip(fed_dss, genetors)
     ]
-    test_loader = DataLoader(test_ds, args.BATCH_SIZE * 4)
+    test_loader = DataLoader(test_ds, config.BATCH_SIZE * 4)
 
     # 2. Prepare Model and Criterion
     classes = 1000
@@ -89,8 +89,8 @@ def test_tiny_image_net_cuda(data_path: str = ""):
         fed_loader=fed_loader,
         test_loader=test_loader,
         criterion=criterion,
-        args=args,
-    ).fit(args.NUM_CLIENT, args.ACTIVE_CLIENT, args.SERVER_EPOCHS)
+        config=config,
+    ).fit(config.NUM_CLIENT, config.ACTIVE_CLIENT, config.SERVER_EPOCHS)
 
 
 if __name__ == "__main__":

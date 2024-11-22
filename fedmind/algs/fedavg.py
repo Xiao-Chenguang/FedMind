@@ -15,9 +15,9 @@ class FedAvg(FedAlg):
         fed_loader: list[DataLoader],
         test_loader: DataLoader,
         criterion: _Loss,
-        args: EasyDict,
+        config: EasyDict,
     ):
-        super().__init__(model, fed_loader, test_loader, criterion, args)
+        super().__init__(model, fed_loader, test_loader, criterion, config)
         self.logger.info(f"Start {self.__class__.__name__}.")
 
     def _aggregate_updates(self, updates: list[dict]) -> dict:

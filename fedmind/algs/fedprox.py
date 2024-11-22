@@ -22,10 +22,10 @@ class FedProx(FedAvg):
         fed_loader: list[DataLoader],
         test_loader: DataLoader,
         criterion: _Loss,
-        args: EasyDict,
+        config: EasyDict,
     ):
-        super().__init__(model, fed_loader, test_loader, criterion, args)
-        assert hasattr(args, "PROX_MU"), "PROX_MU is not set for FedProx."
+        super().__init__(model, fed_loader, test_loader, criterion, config)
+        assert hasattr(config, "PROX_MU"), "PROX_MU is not set for FedProx."
 
     @staticmethod
     def _train_client(
@@ -36,7 +36,7 @@ class FedProx(FedAvg):
         criterion: _Loss,
         epochs: int,
         logger: logging.Logger,
-        args: EasyDict,
+        config: EasyDict,
     ) -> dict[str, Any]:
         """Train the model with given environment.
 
@@ -52,7 +52,7 @@ class FedProx(FedAvg):
         Returns:
             A dictionary containing the trained model parameters.
         """
-        mu = args.PROX_MU
+        mu = config.PROX_MU
 
         # Train the model
         model.load_state_dict(gm_params)
@@ -61,8 +61,8 @@ class FedProx(FedAvg):
         for epoch in range(epochs):
             logger.debug(f"Epoch {epoch + 1}/{epochs}")
             for inputs, labels in train_loader:
-                inputs = inputs.to(args.DEVICE)
-                labels = labels.to(args.DEVICE)
+                inputs = inputs.to(config.DEVICE)
+                labels = labels.to(config.DEVICE)
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss: Tensor = criterion(outputs, labels)
