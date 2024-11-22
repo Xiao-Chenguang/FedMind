@@ -34,16 +34,16 @@ class FedAlg:
         fed_loader: list[DataLoader],
         test_loader: DataLoader,
         criterion: _Loss,
-        args: EasyDict,
+        config: EasyDict,
     ):
-        self._model = model.to(args.DEVICE)
+        self._model = model.to(config.DEVICE)
         self._fed_loader = fed_loader
         self._test_loader = test_loader
         self._criterion = criterion
-        self.args = args
+        self.config = config
 
         self._gm_params = self._model.state_dict(destination=StateDict()) * 1
-        optim: dict = self.args.OPTIM
+        optim: dict = self.config.OPTIM
         if optim["NAME"] == "SGD":
             self._optimizer = SGD(
                 self._model.parameters(),
@@ -56,20 +56,20 @@ class FedAlg:
 
         self._wb_run = wandb.init(
             mode="offline",
-            project=args.get("WB_PROJECT", "fedmind"),
-            entity=args.get("WB_ENTITY", "wandb"),
-            config=self.args.to_dict(),
+            project=config.get("WB_PROJECT", "fedmind"),
+            entity=config.get("WB_ENTITY", "wandb"),
+            config=self.config.to_dict(),
             settings=wandb.Settings(_disable_stats=True, _disable_machine_info=True),
         )
 
         logging.basicConfig(
-            level=args.LOG_LEVEL,
+            level=config.LOG_LEVEL,
             format="%(asctime)s %(levelname)s [%(processName)s] %(message)s",
         )
         self.logger = logging.getLogger("Server")
-        self.logger.info(f"Get following configs:\n{yaml.dump(args.to_dict())}")
+        self.logger.info(f"Get following configs:\n{yaml.dump(config.to_dict())}")
 
-        if self.args.NUM_PROCESS > 0:
+        if self.config.NUM_PROCESS > 0:
             self.__init_mp__()
 
     def __init_mp__(self):
@@ -88,7 +88,7 @@ class FedAlg:
         # Start client processes
         self._processes = mp.spawn(
             self._create_worker_process,
-            nprocs=self.args.NUM_PROCESS,
+            nprocs=self.config.NUM_PROCESS,
             join=False,  # Do not wait for processes to finish
             args=(
                 self._task_queue,
@@ -97,20 +97,20 @@ class FedAlg:
                 self._train_client,
                 self._test_server,
                 self._model,
-                self.args.OPTIM,
+                self.config.OPTIM,
                 self._criterion,
-                self.args.CLIENT_EPOCHS,
-                self.args.LOG_LEVEL,
-                self.args,
+                self.config.CLIENT_EPOCHS,
+                self.config.LOG_LEVEL,
+                self.config,
             ),
         )
-        self.logger.debug(f"Started {self.args.NUM_PROCESS} worker processes.")
+        self.logger.debug(f"Started {self.config.NUM_PROCESS} worker processes.")
 
     def __del_mp__(self):
         """Terminate multi-process environment."""
 
         # Terminate all client processes
-        for _ in range(self.args.NUM_PROCESS):
+        for _ in range(self.config.NUM_PROCESS):
             self._task_queue.put(("STOP",))
 
         # Wait for all client processes to finish
@@ -146,14 +146,14 @@ class FedAlg:
         Returns:
             The evaluation metrics.
         """
-        if self.args.NUM_PROCESS == 0 or not self.args.TEST_SUBPROCESS:
+        if self.config.NUM_PROCESS == 0 or not self.config.TEST_SUBPROCESS:
             return self._test_server(
                 self._model,
                 self._gm_params,
                 self._test_loader,
                 self._criterion,
                 self.logger,
-                self.args,
+                self.config,
             )
         else:
             return self._test_queue.get()
@@ -165,7 +165,7 @@ class FedAlg:
         test_loader: DataLoader,
         criterion: _Loss,
         logger: logging.Logger,
-        args: EasyDict,
+        config: EasyDict,
     ) -> dict:
         """Test the model.
 
@@ -187,8 +187,8 @@ class FedAlg:
         model.eval()
         with torch.no_grad():
             for inputs, labels in test_loader:
-                inputs = inputs.to(args.DEVICE)
-                labels = labels.to(args.DEVICE)
+                inputs = inputs.to(config.DEVICE)
+                labels = labels.to(config.DEVICE)
                 outputs = model(inputs)
                 loss: Tensor = criterion(outputs, labels)
                 total_loss += loss.item()
@@ -217,7 +217,7 @@ class FedAlg:
 
             # 2. Synchornous clients training
             updates = []
-            if self.args.NUM_PROCESS == 0:
+            if self.config.NUM_PROCESS == 0:
                 # Serial simulation instead of parallel
                 for cid in clients:
                     updates.append(
@@ -227,14 +227,14 @@ class FedAlg:
                             self._fed_loader[cid],
                             self._optimizer,
                             self._criterion,
-                            self.args.CLIENT_EPOCHS,
+                            self.config.CLIENT_EPOCHS,
                             self.logger,
-                            self.args,
+                            self.config,
                         )
                     )
             else:
                 # Parallel simulation with torch.multiprocessing
-                if self.args.TEST_SUBPROCESS:
+                if self.config.TEST_SUBPROCESS:
                     self._task_queue.put(("TEST", self._gm_params, self._test_loader))
                 for cid in clients:
                     self._task_queue.put(
@@ -254,7 +254,7 @@ class FedAlg:
             self._wb_run.log(train_metrics | test_metrics)
 
         # Terminate multi-process environment
-        if self.args.NUM_PROCESS > 0:
+        if self.config.NUM_PROCESS > 0:
             self.__del_mp__()
 
         # Finish wandb run and sync
@@ -270,8 +270,8 @@ class FedAlg:
         criterion: _Loss,
         epochs: int,
         logger: logging.Logger,
-        args: EasyDict,
-        *args_,
+        config: EasyDict,
+        *args,
         **kwargs,
     ) -> dict[str, Any]:
         """Train the model with given environment.
@@ -295,8 +295,8 @@ class FedAlg:
         for epoch in range(epochs):
             logger.debug(f"Epoch {epoch + 1}/{epochs}")
             for inputs, labels in train_loader:
-                inputs = inputs.to(args.DEVICE)
-                labels = labels.to(args.DEVICE)
+                inputs = inputs.to(config.DEVICE)
+                labels = labels.to(config.DEVICE)
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss: Tensor = criterion(outputs, labels)
@@ -324,7 +324,7 @@ class FedAlg:
         criterion: _Loss,
         epochs: int,
         log_level: int,
-        args: EasyDict,
+        config: EasyDict,
     ):
         """Train process for multi-process environment.
 
@@ -344,7 +344,7 @@ class FedAlg:
         )
         logger = logging.getLogger(f"Worker-{worker_id}")
         logger.info(f"Worker-{worker_id} started.")
-        if args.SEED >= 0 and args.DEVICE == "cuda":
+        if config.SEED >= 0 and config.DEVICE == "cuda":
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
         model = deepcopy(model)
@@ -359,12 +359,12 @@ class FedAlg:
             elif task[0] == "TRAIN":
                 _, parm, loader = task
                 result = train_func(
-                    model, parm, loader, optimizer, criterion, epochs, logger, args
+                    model, parm, loader, optimizer, criterion, epochs, logger, config
                 )
                 result_queue.put(result)
             elif task[0] == "TEST":
                 _, parm, loader = task
-                result = test_func(model, parm, loader, criterion, logger, args)
+                result = test_func(model, parm, loader, criterion, logger, config)
                 test_queue.put(result)
             else:
                 raise ValueError(f"Unknown task type {task[0]}")

@@ -46,13 +46,13 @@ class MFL(FedAlg):
         fed_loader: list[DataLoader],
         test_loader: DataLoader,
         criterion: _Loss,
-        args: EasyDict,
+        config: EasyDict,
     ):
-        super().__init__(model, fed_loader, test_loader, criterion, args)
+        super().__init__(model, fed_loader, test_loader, criterion, config)
         self.logger.info(f"Start {self.__class__.__name__}.")
 
-        assert args.OPTIM.NAME == "SGD", "MFL only supports Optimizer optimizer."
-        assert args.OPTIM.MOMENTUM > 0, "Momentum should be greater than 0."
+        assert config.OPTIM.NAME == "SGD", "MFL only supports Optimizer optimizer."
+        assert config.OPTIM.MOMENTUM > 0, "Momentum should be greater than 0."
         self._momentum_buffer = None
 
     def _aggregate_updates(self, updates: list[dict]) -> dict:
@@ -81,7 +81,7 @@ class MFL(FedAlg):
         criterion: _Loss,
         epochs: int,
         logger: logging.Logger,
-        args: EasyDict,
+        config: EasyDict,
         momentum_buffer: Optional[StateDict],
     ) -> dict[str, Any]:
         """Train the model with given environment.
@@ -107,8 +107,8 @@ class MFL(FedAlg):
         for epoch in range(epochs):
             logger.debug(f"Epoch {epoch + 1}/{epochs}")
             for inputs, labels in train_loader:
-                inputs = inputs.to(args.DEVICE)
-                labels = labels.to(args.DEVICE)
+                inputs = inputs.to(config.DEVICE)
+                labels = labels.to(config.DEVICE)
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss: Tensor = criterion(outputs, labels)
@@ -140,7 +140,7 @@ class MFL(FedAlg):
 
             # 2. Synchornous clients training
             updates = []
-            if self.args.NUM_PROCESS == 0:
+            if self.config.NUM_PROCESS == 0:
                 # Serial simulation instead of parallel
                 for cid in clients:
                     updates.append(
@@ -150,15 +150,15 @@ class MFL(FedAlg):
                             self._fed_loader[cid],
                             self._optimizer,
                             self._criterion,
-                            self.args.CLIENT_EPOCHS,
+                            self.config.CLIENT_EPOCHS,
                             self.logger,
-                            self.args,
+                            self.config,
                             self._momentum_buffer,
                         )
                     )
             else:
                 # Parallel simulation with torch.multiprocessing
-                if self.args.TEST_SUBPROCESS:
+                if self.config.TEST_SUBPROCESS:
                     self._task_queue.put(("TEST", self._gm_params, self._test_loader))
                 for cid in clients:
                     self._task_queue.put(
@@ -184,7 +184,7 @@ class MFL(FedAlg):
             self._wb_run.log(train_metrics | test_metrics)
 
         # Terminate multi-process environment
-        if self.args.NUM_PROCESS > 0:
+        if self.config.NUM_PROCESS > 0:
             self.__del_mp__()
 
         # Finish wandb run and sync
@@ -204,7 +204,7 @@ class MFL(FedAlg):
         criterion: _Loss,
         epochs: int,
         log_level: int,
-        args: EasyDict,
+        config: EasyDict,
     ):
         """Train process for multi-process environment.
 
@@ -244,14 +244,14 @@ class MFL(FedAlg):
                     criterion,
                     epochs,
                     logger,
-                    args,
+                    config,
                     momentum_buffer,
                 )
                 result_queue.put(result)
                 logger.debug("result put to queue")
             elif task[0] == "TEST":
                 _, parm, loader = task
-                result = test_func(model, parm, loader, criterion, logger, args)
+                result = test_func(model, parm, loader, criterion, logger, config)
                 test_queue.put(result)
             else:
                 raise ValueError(f"Unknown task type {task[0]}")
