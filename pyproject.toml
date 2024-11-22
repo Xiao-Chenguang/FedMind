@@ -40,6 +40,9 @@ build-backend = "hatchling.build"
 [tool.pyright]
 reportPrivateImportUsage = "none"
 
+[tool.ruff.lint.isort]
+known-third-party = ["wandb"]
+
 [tool.uv]
 dev-dependencies = [
     "datasets>=3.1.0",
