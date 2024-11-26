@@ -133,6 +133,14 @@ class StateDict(dict):
             for k in self.keys():
                 self[k] /= other
 
+    def copy_(self, other):
+        if isinstance(other, dict):
+            for k in other.keys():
+                self[k] = other[k]
+        else:
+            for k in self.keys():
+                self[k] = other
+
 
 class EasyDict(dict):
     """
