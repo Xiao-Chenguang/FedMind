@@ -69,6 +69,19 @@ class FedAlg:
         self.logger = logging.getLogger("Server")
         self.logger.info(f"Get following configs:\n{yaml.dump(config.to_dict())}")
 
+        self.fix_args = {
+            "model": self._model,
+            "optimizer": self._optimizer,
+            "criterion": self._criterion,
+            "epochs": self.config.CLIENT_EPOCHS,
+            "logger": self.logger,
+            "config": self.config,
+        }
+        self.dyn_args = {
+            "gm_params": self._gm_params,
+            "train_loader": self._fed_loader,
+        }
+
         if self.config.NUM_PROCESS > 0:
             self.__init_mp__()
 
@@ -111,7 +124,7 @@ class FedAlg:
 
         # Terminate all client processes
         for _ in range(self.config.NUM_PROCESS):
-            self._task_queue.put(("STOP",))
+            self._task_queue.put(("STOP", {}))
 
         # Wait for all client processes to finish
         assert self._processes is not None, "Worker processes no found."
@@ -166,6 +179,8 @@ class FedAlg:
         criterion: _Loss,
         logger: logging.Logger,
         config: EasyDict,
+        *args,
+        **kwargs,
     ) -> dict:
         """Test the model.
 
@@ -220,26 +235,27 @@ class FedAlg:
             if self.config.NUM_PROCESS == 0:
                 # Serial simulation instead of parallel
                 for cid in clients:
-                    updates.append(
-                        self._train_client(
-                            self._model,
-                            self._gm_params,
-                            self._fed_loader[cid],
-                            self._optimizer,
-                            self._criterion,
-                            self.config.CLIENT_EPOCHS,
-                            self.logger,
-                            self.config,
-                        )
-                    )
+                    dyn_args = {
+                        k: v[cid] if isinstance(v, list) else v
+                        for k, v in self.dyn_args.items()
+                    }
+                    k = list(dyn_args["gm_params"].keys())[0]
+                    print(f'passed gm param: {dyn_args['gm_params'][k].sum()}')
+                    updates.append(self._train_client(**(self.fix_args | dyn_args)))
             else:
                 # Parallel simulation with torch.multiprocessing
                 if self.config.TEST_SUBPROCESS:
-                    self._task_queue.put(("TEST", self._gm_params, self._test_loader))
+                    test_dyn_args = {
+                        "gm_params": self._gm_params,
+                        "test_loader": self._test_loader,
+                    }
+                    self._task_queue.put(("TEST", test_dyn_args))
                 for cid in clients:
-                    self._task_queue.put(
-                        ("TRAIN", self._gm_params, self._fed_loader[cid])
-                    )
+                    dyn_args = {
+                        k: v[cid] if isinstance(v, list) else v
+                        for k, v in self.dyn_args.items()
+                    }
+                    self._task_queue.put(("TRAIN", dyn_args))
                 for cid in clients:
                     updates.append(self._result_queue.get())
 
@@ -352,19 +368,23 @@ class FedAlg:
             optimizer = SGD(model.parameters(), lr=optim["LR"])
         else:
             raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
+        fix_args = {
+            "model": model,
+            "optimizer": optimizer,
+            "criterion": criterion,
+            "epochs": epochs,
+            "logger": logger,
+            "config": config,
+        }
         while True:
-            task = task_queue.get()
-            if task[0] == "STOP":
+            task, dyn_args = task_queue.get()
+            if task == "STOP":
                 break
-            elif task[0] == "TRAIN":
-                _, parm, loader = task
-                result = train_func(
-                    model, parm, loader, optimizer, criterion, epochs, logger, config
-                )
+            elif task == "TRAIN":
+                result = train_func(**(fix_args | dyn_args))
                 result_queue.put(result)
-            elif task[0] == "TEST":
-                _, parm, loader = task
-                result = test_func(model, parm, loader, criterion, logger, config)
+            elif task == "TEST":
+                result = test_func(**(fix_args | dyn_args))
                 test_queue.put(result)
             else:
-                raise ValueError(f"Unknown task type {task[0]}")
+                raise ValueError(f"Unknown task type {task}")
