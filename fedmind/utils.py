@@ -101,6 +101,38 @@ class StateDict(dict):
                 res[k] = v**other
         return res
 
+    def add_(self, other):
+        if isinstance(other, dict):
+            for k in self.keys():
+                self[k] += other[k]
+        else:
+            for k, v in self.items():
+                self[k] += other
+
+    def sub_(self, other):
+        if isinstance(other, dict):
+            for k in self.keys():
+                self[k] -= other[k]
+        else:
+            for k, v in self.items():
+                self[k] -= other
+
+    def mul_(self, other):
+        if isinstance(other, dict):
+            for k in self.keys():
+                self[k] *= other[k]
+        else:
+            for k, v in self.items():
+                self[k] *= other
+
+    def div_(self, other):
+        if isinstance(other, dict):
+            for k in self.keys():
+                self[k] /= other[k]
+        else:
+            for k, v in self.items():
+                self[k] /= other
+
 
 class EasyDict(dict):
     """
