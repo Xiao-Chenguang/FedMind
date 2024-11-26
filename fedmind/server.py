@@ -365,7 +365,12 @@ class FedAlg:
             torch.backends.cudnn.benchmark = False
         model = deepcopy(model)
         if optim["NAME"] == "SGD":
-            optimizer = SGD(model.parameters(), lr=optim["LR"])
+            optimizer = SGD(
+                model.parameters(),
+                lr=optim["LR"],
+                momentum=optim.get("MOMENTUM", 0),
+                dampening=optim.get("DAMPENING", 0),
+            )
         else:
             raise NotImplementedError(f"Optimizer {optim['NAME']} not implemented.")
         fix_args = {
