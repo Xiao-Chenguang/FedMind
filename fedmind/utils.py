@@ -114,7 +114,7 @@ class StateDict(dict):
             for k in self.keys():
                 self[k] -= other[k]
         else:
-            for k, v in self.items():
+            for k in self.keys():
                 self[k] -= other
 
     def mul_(self, other):
@@ -122,7 +122,7 @@ class StateDict(dict):
             for k in self.keys():
                 self[k] *= other[k]
         else:
-            for k, v in self.items():
+            for k in self.keys():
                 self[k] *= other
 
     def div_(self, other):
@@ -130,7 +130,7 @@ class StateDict(dict):
             for k in self.keys():
                 self[k] /= other[k]
         else:
-            for k, v in self.items():
+            for k in self.keys():
                 self[k] /= other
 
 
