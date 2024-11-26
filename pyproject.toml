@@ -1,6 +1,6 @@
 [project]
 name = "fedmind"
-version = "0.1.12"
+version = "0.2.0"
 description = "Federated Learning research framework in your mind"
 readme = "README.md"
 requires-python = ">=3.12"
