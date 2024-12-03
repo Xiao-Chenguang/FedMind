@@ -190,9 +190,10 @@ class FedAlg:
             test_loader: The DataLoader object that contains the test data.
             criterion: The loss function to use.
             logger: The logger object to log the testing process.
+            config: The configuration dictionary.
 
         Returns:
-            The evaluation metrics.
+            The evaluation metrics dict.
         """
 
         total_loss = 0
@@ -300,9 +301,10 @@ class FedAlg:
             criterion: The loss function to use.
             epochs: The number of epochs to train the model.
             logger: The logger object to log the training process.
+            config: The configuration dictionary.
 
         Returns:
-            A dictionary containing the trained model parameters.
+            A dictionary containing the trained model parameters, training loss and more.
         """
         # Train the model
         model.load_state_dict(gm_params)
@@ -342,17 +344,21 @@ class FedAlg:
         log_level: int,
         config: EasyDict,
     ):
-        """Train process for multi-process environment.
+        """Train subprocess for multi-process environment.
 
         Args:
             worker_id: The worker process id.
             task_queue: The task queue for task distribution.
-            result_queue: The result queue for result collection.
+            result_queue: The result queue for training.
+            test_queue: The result queue for testing.
             client_func: The client function to train the model.
+            test_func: The function to test the model.
             model: The model to train.
             optim: dictionary containing the optimizer parameters.
             criterion: The loss function to use.
             epochs: The number of epochs to train the model.
+            log_level: The logging level.
+            config: The configuration dictionary.
         """
         logging.basicConfig(
             level=log_level,

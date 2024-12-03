@@ -48,6 +48,7 @@ class FedProx(FedAvg):
             criterion: The loss function to use.
             epochs: The number of epochs to train the model.
             logger: The logger object to log the training process.
+            config: The configuration dict.
 
         Returns:
             A dictionary containing the trained model parameters.
