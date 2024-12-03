@@ -92,6 +92,8 @@ class MFL(FedAlg):
             criterion: The loss function to use.
             epochs: The number of epochs to train the model.
             logger: The logger object to log the training process.
+            config: The configuration dict.
+            momentum_buffer: The momentum buffer to use.
 
         Returns:
             A dictionary containing the trained model parameters.
