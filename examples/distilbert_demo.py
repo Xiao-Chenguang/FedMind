@@ -139,7 +139,7 @@ def test_fedavg():
     # 1. Prepare Federated Learning DataSets
     tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased")
 
-    org_ds = load_dataset("IMDB", split="train", cache_dir="dataset").map(
+    org_ds = load_dataset("IMDB", split="train[:5%]", cache_dir="dataset").map(
         lambda x: tokenizer(
             x["text"], truncation=True, padding="max_length", max_length=512
         ),
@@ -147,7 +147,7 @@ def test_fedavg():
     )
     org_ds.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])  # type: ignore
 
-    test_ds = load_dataset("IMDB", split="test", cache_dir="dataset").map(
+    test_ds = load_dataset("IMDB", split="test[:5%]", cache_dir="dataset").map(
         lambda x: tokenizer(
             x["text"], truncation=True, padding="max_length", max_length=512
         ),
