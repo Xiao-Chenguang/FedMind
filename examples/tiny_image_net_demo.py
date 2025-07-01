@@ -95,5 +95,5 @@ def test_tiny_image_net_cuda(data_path: str = ""):
 
 if __name__ == "__main__":
     mp.set_start_method("spawn")
-    path = "/bask/homes/c/cxx075/Chenguang/projects/FedGA/datasets/tiny-imagenet"
+    path = "tiny-imagenet-data-path"  # Replace with your actual path
     test_tiny_image_net_cuda(path)
